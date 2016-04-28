@@ -1,22 +1,23 @@
 #!/usr/bin/python
 
 """
-This is a script to create the bones of a Flask application using Python because
-Powershell is awful.
+This is a script to create the bones of a Flask application using Python.
 
 The created structure is as follows, for an app named foo:
 
-foo
+~/foo
   |
-  foo_app
-  |     |
-  |     __init__.py
-  |     views.py
-  |     views
-  |         |
-  |         index.html
-  run.py
-  venv
+  __/foo_app
+  |     |-- __init__.py
+  |     |-- models.py
+  |     |-- views.py
+  |     |__ /static
+  |     |__ /templates
+  |         |__foo
+  |             |-- index.html
+  |         
+  |--run.py
+  |__/venv
 
 """
 
@@ -45,10 +46,18 @@ def create_app(app_name, root_dir):
   app_dir = create_dir(project_dir, app_dir_name)
   create_init_script(app_dir, app_dir_name)
 
-  #Create the views
+  #Create the models, views and forms files
+  create_file(app_dir, 'models.py')
+  create_file(app_dir, 'forms.py')
+  create_views_script(app_dir, app_dir_name)
+
+  #Create the static directory
+  static_dir = create_dir(app_dir, 'static')
+
+  #Create the templates
   templates_dir = create_dir(app_dir, 'templates')
-  create_views_script(app_dir, app_dir_name) 
-  create_basic_view(templates_dir, app_name)
+  templates_mod_dir = create_dir(templates_dir, app_name)
+  create_basic_view(templates_mod_dir, app_name)
   debug('Finished app creation.')
 
 def create_basic_view(templates_dir, app_name):
@@ -72,7 +81,7 @@ def create_views_script(app_dir, app_dir_name):
   lines.append('')
   lines.append('@app.route(\'/\', methods=[\'GET\'])')
   lines.append('def render_index():')
-  lines.append('\treturn render_template(\'index.html\')')
+  lines.append('\treturn render_template(\'%s/index.html\')' % app_dir_name[:-4])
   write_to_file(view_script, lines)
   debug('Created view script.')
 
@@ -159,7 +168,7 @@ def main(argv):
       verbose = True
   
   if not args or len(args) > 2:
-    # Wrong number of argments supplied.
+    # Wrong number of arguments supplied.
     usage()
     sys.exit(2)
   else:
